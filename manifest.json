@@ -2,7 +2,7 @@
   "name": "E-Smoker Kalkulator",
   "short_name": "E-Smoker",
   "description": "Praćenje troškova e-pušenja i uštedina",
-  "start_url": "/",
+  "start_url": "/E-Cigarete/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#071640",
