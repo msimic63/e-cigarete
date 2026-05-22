@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+<meta name="theme-color" content="#071640"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="E-Smoker"/>
+<link rel="manifest" href="manifest.json"/>
+<link rel="apple-touch-icon" href="icon-192.png"/>
+<title>E-Smoker Kalkulator</title>
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --bg:#071640;--bgMid:#0a2d6e;--card:#0f4393;--cardLight:#1254a8;
+    --accent:#1565c0;--accentDim:#4a90d9;
+    --border:rgba(100,160,220,0.25);--borderBright:rgba(100,160,220,0.5);
+    --white:#fff;--w80:rgba(255,255,255,0.8);--w50:rgba(255,255,255,0.5);--w30:rgba(255,255,255,0.3);
+    --safe-top:env(safe-area-inset-top,0px);--safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html,body{height:100%;background:var(--bg);font-family:'Segoe UI',system-ui,sans-serif;color:var(--white);-webkit-tap-highlight-color:transparent;overflow:hidden;}
+  .app{height:100vh;height:100dvh;display:flex;flex-direction:column;max-width:520px;margin:0 auto;}
+  .header{background:linear-gradient(135deg,#071a4a,var(--bg));padding:calc(14px + var(--safe-top)) 20px 12px;border-bottom:1px solid var(--border);flex-shrink:0;}
+  .header-date{font-size:10px;letter-spacing:3px;color:var(--white);text-transform:uppercase;margin-bottom:3px;}
+  .header h1{font-size:20px;font-weight:900;color:var(--white);}
+  .tabs{background:linear-gradient(90deg,#0a2055,#0d47a1);border-bottom:1px solid var(--border);display:flex;flex-shrink:0;position:sticky;top:0;z-index:10;}
+  .tab-btn{flex:1;padding:12px 2px 9px;border:none;background:none;cursor:pointer;font-size:12px;font-weight:700;color:var(--w50);border-bottom:3px solid transparent;transition:all 0.18s;}
+  .tab-btn.active{color:var(--white);border-bottom-color:var(--accentDim);background:rgba(66,165,245,0.12);}
+  .tab-icon{font-size:16px;display:block;margin-bottom:2px;}
+  .content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px calc(14px + var(--safe-bottom));}
+  .tab-panel{display:none;}.tab-panel.active{display:block;}
+  .card{background:linear-gradient(145deg,var(--card),var(--cardLight));border:1px solid var(--border);border-radius:18px;padding:16px 18px;margin-bottom:12px;}
+  .card-title{font-size:15px;font-weight:800;color:var(--white);margin-bottom:14px;}
+  .hero{background:linear-gradient(135deg,#071a4a,#0d47a1);border:1px solid var(--borderBright);border-radius:20px;padding:22px 20px;margin-bottom:12px;box-shadow:0 8px 32px rgba(13,71,161,0.5);}
+  .hero-label{font-size:10px;letter-spacing:2px;color:var(--w50);text-transform:uppercase;}
+  .hero-amount{font-size:42px;font-weight:900;letter-spacing:-2px;color:#7ec8f7;margin:4px 0 2px;line-height:1;}
+  .hero-sub{font-size:13px;color:var(--w80);}
+  .stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+  .stat-card{background:linear-gradient(135deg,#1565c0,#0d47a1);border:1px solid var(--border);border-radius:14px;padding:12px 14px;}
+  .stat-card.accent{border-color:var(--accentDim);}
+  .stat-label{font-size:9px;color:var(--w50);font-weight:700;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;}
+  .stat-value{font-size:20px;font-weight:900;color:var(--white);line-height:1;}
+  .stat-card.accent .stat-value{color:#7ec8f7;}
+  .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border);font-size:14px;}
+  .row:last-child{border-bottom:none;}
+  .row-label{color:var(--w80);font-weight:500;}
+  .row-value{font-weight:800;color:var(--white);}
+  .row-value.hl{color:#7ec8f7;}
+  .input-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+  .input-label{font-size:14px;color:var(--w80);font-weight:500;flex:1;padding-right:8px;}
+  .input-field{width:150px;padding:8px 10px;border-radius:10px;border:1.5px solid var(--borderBright);font-size:14px;font-weight:700;text-align:right;outline:none;background:rgba(255,255,255,0.12);color:var(--white);color-scheme:dark;}
+  .cost-row{display:flex;align-items:center;gap:6px;padding:9px 0;border-bottom:1px solid var(--border);}
+  .cost-label{font-size:12px;color:var(--w80);font-weight:600;min-width:70px;}
+  .cost-date{flex:1;padding:6px;border-radius:8px;border:1.5px solid var(--borderBright);background:rgba(255,255,255,0.1);color:var(--white);font-size:11px;outline:none;color-scheme:dark;min-width:0;}
+  .cost-val{width:78px;padding:6px;border-radius:8px;border:1.5px solid var(--borderBright);background:rgba(255,255,255,0.1);color:var(--white);font-size:13px;font-weight:700;text-align:right;outline:none;color-scheme:dark;}
+  .cost-unit{font-size:11px;color:var(--w50);min-width:16px;}
+  .bar-wrap{margin-bottom:12px;}
+  .bar-header{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .bar-track{height:10px;background:rgba(255,255,255,0.1);border-radius:99px;}
+  .bar-fill{height:100%;border-radius:99px;transition:width 0.6s;}
+  .heater-item{padding:12px 0;border-bottom:1px solid var(--border);}
+  .heater-head{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+  .heater-name{font-size:14px;font-weight:700;}
+  .heater-days{font-size:11px;font-weight:600;}
+  .heater-input{width:100%;padding:9px 14px;border-radius:10px;border:1.5px solid var(--borderBright);font-size:14px;font-weight:600;background:rgba(255,255,255,0.12);color:var(--white);outline:none;color-scheme:dark;}
+  .heater-input.urgent{border-color:#ff5252;background:rgba(255,82,82,0.15);}
+  .info-box{background:rgba(66,165,245,0.1);border-radius:14px;padding:12px 16px;border:1px solid var(--border);}
+  .info-title{font-size:12px;color:#7ec8f7;font-weight:700;}
+  .info-text{font-size:13px;color:var(--w80);margin-top:4px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-date" id="hdr-date"></div>
+    <h1>💨 E-Smoker Kalkulator</h1>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="dashboard"><span class="tab-icon">📊</span>Pregled</button>
+    <button class="tab-btn" data-tab="costs"><span class="tab-icon">💸</span>Troškovi</button>
+    <button class="tab-btn" data-tab="heaters"><span class="tab-icon">🔥</span>Grijači</button>
+    <button class="tab-btn" data-tab="settings"><span class="tab-icon">⚙️</span>Podaci</button>
+  </div>
+  <div class="content">
+
+    <!-- PREGLED -->
+    <div class="tab-panel active" id="panel-dashboard">
+      <div class="hero">
+        <div class="hero-label">💰 Ukupno uštedeno</div>
+        <div class="hero-amount" id="d-saved">+0.00 €</div>
+        <div class="hero-sub" id="d-days">0 dana e-pušenja</div>
+      </div>
+      <div class="stat-grid">
+        <div class="stat-card accent"><div class="stat-label">Ušteda / dan</div><div class="stat-value" id="d-saved-day">0.00 €</div></div>
+        <div class="stat-card accent"><div class="stat-label">Ušteda / god.</div><div class="stat-value" id="d-saved-year">0 €</div></div>
+        <div class="stat-card"><div class="stat-label">Da pušim / dan</div><div class="stat-value" id="d-would-day">0.00 €</div></div>
+        <div class="stat-card"><div class="stat-label">Ml / dan</div><div class="stat-value" id="d-ml-day">—</div></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Usporedba troškova</div>
+        <div class="bar-wrap">
+          <div class="bar-header"><span style="color:var(--w80);font-weight:600">🚬 Da pušim</span><span style="font-weight:800" id="d-would-total">0.00 €</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:100%;background:#4a90d9"></div></div>
+        </div>
+        <div class="bar-wrap">
+          <div class="bar-header"><span style="color:var(--w80);font-weight:600">💨 E-cigarete</span><span style="font-weight:800" id="d-spent-total">0.00 €</span></div>
+          <div class="bar-track"><div class="bar-fill" style="background:#1565c0" id="bar-spent"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TROŠKOVI -->
+    <div class="tab-panel" id="panel-costs">
+      <div class="card">
+        <div class="card-title">💸 Unos troškova</div>
+        <div class="cost-row">
+          <span class="cost-label">E-cigarete</span>
+          <input class="cost-date" type="date" id="c-ecig-date" color-scheme="dark"/>
+          <input class="cost-val" type="number" id="c-ecig-val" min="0" step="0.01"/>
+          <span class="cost-unit">€</span>
+        </div>
+        <div class="cost-row">
+          <span class="cost-label">Cigarete</span>
+          <input class="cost-date" type="date" id="c-cig-date"/>
+          <input class="cost-val" type="number" id="c-cig-val" min="0" step="0.01"/>
+          <span class="cost-unit">€</span>
+        </div>
+        <div class="cost-row" style="border-bottom:none">
+          <span class="cost-label">Tekućina</span>
+          <input class="cost-date" type="date" id="c-liq-date"/>
+          <input class="cost-val" type="number" id="c-liq-val" min="0" step="1"/>
+          <span class="cost-unit">ml</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Statistika</div>
+        <div class="row"><span class="row-label">POTROŠENO (EUR)</span><span class="row-value hl" id="c-spent">0.00 €</span></div>
+        <div class="row"><span class="row-label">DNEVNO (EUR)</span><span class="row-value hl" id="c-daily">0.000 €</span></div>
+        <div class="row"><span class="row-label">Dnevno (ml)</span><span class="row-value" id="c-ml-day">—</span></div>
+        <div class="row"><span class="row-label">Da pušim / dan</span><span class="row-value" id="c-would-day">0.00 €</span></div>
+        <div class="row"><span class="row-label">Uštedeno / dan</span><span class="row-value" id="c-saved-day">0.00 €</span></div>
+        <div class="row"><span class="row-label">Da pušim / god.</span><span class="row-value" id="c-would-year">0 €</span></div>
+      </div>
+    </div>
+
+    <!-- GRIJAČI -->
+    <div class="tab-panel" id="panel-heaters">
+      <div class="card">
+        <div class="card-title">🔥 Grijači – zadnja zamjena</div>
+        <div style="font-size:12px;color:var(--w50);margin-top:-8px;margin-bottom:12px">Sortirano od najstarijeg do najnovijeg</div>
+        <div id="heater-list"></div>
+      </div>
+      <div class="info-box">
+        <div class="info-title">ℹ️ Preporuka</div>
+        <div class="info-text">Grijači se preporučuju mijenjati svakih 7–14 dana. Narančasta = 7+ dana, crvena = 14+ dana.</div>
+      </div>
+    </div>
+
+    <!-- PODACI -->
+    <div class="tab-panel" id="panel-settings">
+      <div class="card">
+        <div class="card-title">⚙️ Osnovni podaci</div>
+        <div class="input-row"><span class="input-label">E-pušenje od datuma</span><input class="input-field" type="date" id="s-start"/></div>
+        <div class="row"><span class="row-label">Ukupno dana</span><span class="row-value" id="s-days">0</span></div>
+        <div class="input-row"><span class="input-label">Cigareta / dan</span><input class="input-field" type="number" id="s-cpd" min="1" step="1"/></div>
+        <div class="input-row" style="border-bottom:none"><span class="input-label">Cijena cigarete (€)</span><input class="input-field" type="number" id="s-cprice" min="0" step="0.01"/></div>
+        <div style="margin-top:14px;padding:14px;background:rgba(255,255,255,0.18);border-radius:12px;border:1px solid var(--borderBright);">
+          <div style="font-size:11px;color:var(--white);font-weight:700;text-transform:uppercase;letter-spacing:1px">Da pušim ukupno</div>
+          <div style="font-size:26px;font-weight:900;color:var(--white);margin-top:4px" id="s-would-total">0.00 €</div>
+          <div style="font-size:12px;color:var(--w50);margin-top:2px" id="s-formula"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const HEATERS=[
+  {key:"heaterGreyDate",label:"Grijač sivi",emoji:"⬜"},
+  {key:"heaterDLBlackDate",label:"Grijač DL crni",emoji:"⬛"},
+  {key:"heaterBlackDate",label:"Grijač crni",emoji:"🖤"},
+  {key:"heaterDLGoldDate",label:"Grijač DL zlatni",emoji:"🟡"},
+  {key:"heaterGunDate",label:"Grijač gun",emoji:"🔫"},
+];
+const DEFAULTS={
+  startDate:"2013-04-03",cigsPerDay:22,cigPrice:0.18,
+  eCigCost:4186.92,eCigDate:"",
+  liquidMl:34690,liquidCost:1108.20,liquidDate:"",cigDate:"",
+  heaterGreyDate:"2025-11-15",heaterDLBlackDate:"2026-02-12",
+  heaterBlackDate:"2026-04-14",heaterDLGoldDate:"2026-04-18",heaterGunDate:"2026-04-22",
+};
+
+// IndexedDB
+const DB_NAME="esmoker_db",DB_STORE="state",DB_KEY="main";let db=null;
+function openDB(){return new Promise((res,rej)=>{const r=indexedDB.open(DB_NAME,1);r.onupgradeneeded=e=>e.target.result.createObjectStore(DB_STORE);r.onsuccess=e=>{db=e.target.result;res();};r.onerror=()=>rej();});}
+function dbSave(s){if(!db)return;db.transaction(DB_STORE,"readwrite").objectStore(DB_STORE).put({...s},DB_KEY);}
+function dbLoad(){return new Promise(res=>{if(!db){res(null);return;}const r=db.transaction(DB_STORE,"readonly").objectStore(DB_STORE).get(DB_KEY);r.onsuccess=()=>res(r.result||null);r.onerror=()=>res(null);});}
+
+let state={...DEFAULTS};
+function eur(n,d=2){return Number(n||0).toFixed(d)+" €";}
+function daysSince(ds){if(!ds)return null;return Math.max(0,Math.floor((Date.now()-new Date(ds))/86400000));}
+
+// Header date
+function updateHeader(){
+  const now=new Date();
+  document.getElementById("hdr-date").textContent=now.toLocaleDateString("hr-HR")+" · "+now.toLocaleDateString("hr-HR",{weekday:"long"});
+}
+
+// Tabs
+document.querySelectorAll(".tab-btn").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById("panel-"+btn.dataset.tab).classList.add("active");
+    if(btn.dataset.tab==="heaters")renderHeaters();
+  });
+});
+
+function bindInput(id,key,parse){
+  const el=document.getElementById(id);if(!el)return;
+  el.value=state[key]??"";
+  el.addEventListener("change",()=>{state[key]=parse?parse(el.value):el.value;dbSave(state);recalc();if(document.getElementById("panel-heaters").classList.contains("active"))renderHeaters();});
+}
+
+function recalc(){
+  const today=new Date();
+  const start=state.startDate?new Date(state.startDate):null;
+  const days=start?Math.max(0,Math.floor((today-start)/86400000)):0;
+  const wouldTotal=days*state.cigsPerDay*state.cigPrice;
+  const eSpent=(state.eCigCost||0)+(state.liquidCost||0);
+  const saved=wouldTotal-eSpent;
+  const savedDay=days>0?saved/days:0;
+  const wouldDay=(state.cigsPerDay||0)*(state.cigPrice||0);
+  const mlDay=days>0?(state.liquidMl||0)/days:0;
+  const eDaily=days>0?eSpent/days:0;
+  const savedYear=savedDay*365;
+  const barPct=wouldTotal>0?Math.min(100,(eSpent/wouldTotal)*100):0;
+
+  document.getElementById("d-saved").textContent=(saved>=0?"+":"")+eur(saved);
+  document.getElementById("d-days").textContent=days.toLocaleString("hr-HR")+" dana e-pušenja";
+  document.getElementById("d-saved-day").textContent=eur(savedDay);
+  document.getElementById("d-saved-year").textContent=Math.round(savedYear)+" €";
+  document.getElementById("d-would-day").textContent=eur(wouldDay);
+  document.getElementById("d-ml-day").textContent=mlDay>0?mlDay.toFixed(3)+" ml":"—";
+  document.getElementById("d-would-total").textContent=eur(wouldTotal);
+  document.getElementById("d-spent-total").textContent=eur(eSpent);
+  document.getElementById("bar-spent").style.width=barPct+"%";
+
+  document.getElementById("c-spent").textContent=eur(eSpent);
+  document.getElementById("c-daily").textContent=eur(eDaily,3);
+  document.getElementById("c-ml-day").textContent=mlDay>0?mlDay.toFixed(3)+" ml":"—";
+  document.getElementById("c-would-day").textContent=eur(wouldDay);
+  document.getElementById("c-saved-day").textContent=eur(savedDay);
+  document.getElementById("c-would-year").textContent=Math.round(wouldDay*365)+" €";
+
+  document.getElementById("s-days").textContent=days.toLocaleString("hr-HR");
+  document.getElementById("s-would-total").textContent=eur(wouldTotal);
+  document.getElementById("s-formula").textContent=days+" dana × "+state.cigsPerDay+" cig × "+state.cigPrice+" €";
+}
+
+function renderHeaters(){
+  const sorted=[...HEATERS].sort((a,b)=>{
+    const da=state[a.key]?new Date(state[a.key]):new Date(0);
+    const db=state[b.key]?new Date(state[b.key]):new Date(0);
+    return da-db;
+  });
+  const list=document.getElementById("heater-list");
+  list.innerHTML="";
+  sorted.forEach(({key,label,emoji})=>{
+    const d=daysSince(state[key]);
+    const urgent=d!==null&&d>14;
+    const warn=d!==null&&d>7;
+    const statusColor=urgent?"#ff5252":warn?"#ffb74d":"#4a90d9";
+    const statusIcon=urgent?"⚠️":warn?"⏳":"✅";
+    const statusText=d!==null?`${statusIcon} ${d} dana od zadnje zamjene`:"";
+    const div=document.createElement("div");
+    div.className="heater-item";
+    div.innerHTML=`<div class="heater-head"><span style="font-size:20px">${emoji}</span><div><div class="heater-name">${label}</div><div class="heater-days" style="color:${statusColor}">${statusText}</div></div></div><input type="date" class="heater-input${urgent?" urgent":""}" value="${state[key]||""}" data-key="${key}"/>`;
+    list.appendChild(div);
+  });
+  list.querySelectorAll(".heater-input").forEach(inp=>{
+    inp.addEventListener("change",()=>{state[inp.dataset.key]=inp.value;dbSave(state);recalc();renderHeaters();});
+  });
+}
+
+// Cost inputs
+function bindCostInput(id,key,parse){
+  const el=document.getElementById(id);if(!el)return;
+  el.value=state[key]??"";
+  el.addEventListener("change",()=>{state[key]=parse?parse(el.value):el.value;dbSave(state);recalc();});
+}
+
+// Wake Lock
+async function requestWakeLock(){try{if('wakeLock' in navigator)await navigator.wakeLock.request('screen');}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')requestWakeLock();});
+requestWakeLock();
+
+// SW
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+
+// Init
+openDB().then(()=>dbLoad()).then(saved=>{
+  if(saved)state={...DEFAULTS,...saved};
+  bindInput("s-start","startDate",v=>v);
+  bindInput("s-cpd","cigsPerDay",v=>parseFloat(v)||0);
+  bindInput("s-cprice","cigPrice",v=>parseFloat(v)||0);
+  bindCostInput("c-ecig-date","eCigDate",v=>v);
+  bindCostInput("c-ecig-val","eCigCost",v=>parseFloat(v)||0);
+  bindCostInput("c-cig-date","cigDate",v=>v);
+  bindCostInput("c-cig-val","liquidCost",v=>parseFloat(v)||0);
+  bindCostInput("c-liq-date","liquidDate",v=>v);
+  bindCostInput("c-liq-val","liquidMl",v=>parseFloat(v)||0);
+  updateHeader();recalc();renderHeaters();
+}).catch(()=>recalc());
+</script>
+</body>
+</html>
